@@ -3,11 +3,12 @@ let count = 1;
 function mToPx(d) {
   return d*4;
 }
+
 function Mast(x,y,height,label) {
   this.x = x;
   this.y = y;
   this.height = height;
-  this.R = 30;
+  this.R = 24.753;
   this.label = label;
   this.sliders = {};
 }
@@ -33,6 +34,13 @@ Mast.prototype.show = function () {
   textSize(24);
   fill(255);
   text(this.label, 10, 30);
+  textSize(18);
+  fill(255);
+
+  text("(" + this.x.toString() + "," + getYCoord(this.y).toString() + ")", 40, 30);
+
+
+
   pop();
   this.displayCircle(mToPx(this.R));
 };
@@ -49,11 +57,49 @@ Mast.prototype.displayCircle = function(r){
 }
 
 
+function getRox(A,B){
+  let S = distanceMasts(A,B);
+  let h = A.height;
+  let hx = 13.8;
+  let P = 5.5/sqrt(h);
+  // console.log(P);
+
+  let ha = h - (S/(7*P));
+  let Rox;
+  if(hx > (2*ha)/3 && ha <30){
+    Rox = 1.5 * ha * (1 - hx/(0.8*ha));
+  }
+  if(hx < (2*ha)/3 && ha <30){
+    Rox = 0.75 * ha * (1 - hx/ha);
+  }
+  if(hx > (2*ha)/3 && ha > 30){
+    Rox = 1.5 * ha * (1 - hx/(0.8*ha)) * P;
+  }
+  // console.log(Rox);
+  return Rox;
+}
 
 
-function drawLineBetween(A,B,prefferedX,prefferedY){
+
+function drawLineBetween(A,B,Rox,prefferedX,prefferedY){
+  // Rox = Rox || 3.163;
+
+  Rox = getRox(A,B);
+  // console.log("[",A.label,",",B.label,"] ",Rox);
   line(A.x,A.y,B.x,B.y);
-  drawInterpolation(A,B,50,prefferedX,prefferedY);
+  drawInterpolation(A,B,mToPx(Rox),prefferedX,prefferedY);
+
+
+  push();
+  translate((A.x+B.x)/2,(A.y+B.y)/2);
+  textSize(20);
+  fill(255);
+
+  text(distanceMasts(A,B).toFixed(2).toString() + " m",-20,0);
+  pop();
+
+
+
 }
 
 function getYCoord(y){
@@ -205,5 +251,4 @@ function drawInterpolation(A,B,r,prefferedX,prefferedY){
   ellipse(0,0,3,3);
   pop();
   drawTangents(R,A,B,prefferedX,prefferedY);
-
 }
